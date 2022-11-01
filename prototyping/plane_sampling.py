@@ -4,10 +4,10 @@ from tkinter import N
 import open3d as o3d
 import numpy as np
 
-hill = o3d.io.read_triangle_mesh("meshes/simple-hill.ply")
+hill = o3d.io.read_triangle_mesh("../meshes/simple-hill.ply")
 hill.compute_vertex_normals()
 
-hill_erosion = o3d.io.read_triangle_mesh("meshes/simple-hill-erosion3.ply")
+hill_erosion = o3d.io.read_triangle_mesh("../meshes/simple-hill-erosion3.ply")
 hill_erosion.compute_vertex_normals()
 
 hill_pc = hill.sample_points_uniformly(number_of_points=30000)
