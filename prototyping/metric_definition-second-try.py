@@ -59,7 +59,29 @@ if __name__ == "__main__":
     src_down, src_fpfh = preprocess_point_cloud(src, voxel_size)
     dst_down, dst_fpfh = preprocess_point_cloud(dst, voxel_size)
 
-    print('Running FGR')
+    print('Running FGR 1')
+    result = o3d.pipelines.registration.registration_fgr_based_on_feature_matching(
+        src_down, dst_down, src_fpfh, dst_fpfh,
+        o3d.pipelines.registration.FastGlobalRegistrationOption(
+            maximum_correspondence_distance=distance_threshold,
+            iteration_number=max_iterations,
+            maximum_tuple_count=max_tuples))
+
+    src = src.transform(result.transformation)
+    src_down = src_down.transform(result.transformation)
+    
+    print('Running FGR 2')
+    result = o3d.pipelines.registration.registration_fgr_based_on_feature_matching(
+        src_down, dst_down, src_fpfh, dst_fpfh,
+        o3d.pipelines.registration.FastGlobalRegistrationOption(
+            maximum_correspondence_distance=distance_threshold,
+            iteration_number=max_iterations,
+            maximum_tuple_count=max_tuples))
+
+    src = src.transform(result.transformation)
+    src_down = src_down.transform(result.transformation)
+
+    print('Running FGR 3')
     result = o3d.pipelines.registration.registration_fgr_based_on_feature_matching(
         src_down, dst_down, src_fpfh, dst_fpfh,
         o3d.pipelines.registration.FastGlobalRegistrationOption(
@@ -72,24 +94,25 @@ if __name__ == "__main__":
     o3d.visualization.draw_geometries([src, dst])
 
     dists = src.compute_point_cloud_distance(dst)
-#dists = np.asarray(dists)
-print(np.asarray(dists).size)
-print(np.asarray(dst.points))
 
-difference_idx = np.argwhere(np.asarray(dists) >= 0.02)
-print(np.asarray(difference_idx).size)
+    #dists = np.asarray(dists)
+    print(np.asarray(dists).size)
+    print(np.asarray(dst.points))
 
-print(difference_idx)
+    difference_idx = np.argwhere(np.asarray(dists) >= 0.015)
+    print(np.asarray(difference_idx).size)
 
-difference_pc = src.select_by_index(difference_idx)
-difference_pc.paint_uniform_color([1.0, 0.0, 0.0])
+    print(difference_idx)
 
-print("Start outlier removal with nb_neighbors")
-cl, ind = difference_pc.remove_radius_outlier(nb_points = 25, radius = 0.025, print_progress = True)
-print("remove_outlier: DONE!")
+    difference_pc = src.select_by_index(difference_idx)
+    difference_pc.paint_uniform_color([1.0, 0.0, 0.0])
 
-o3d.visualization.draw_geometries([dst, src, difference_pc])
-o3d.visualization.draw_geometries([dst, difference_pc])
-o3d.visualization.draw_geometries([src, difference_pc])
+    print("Start outlier removal with nb_neighbors")
+    cl, ind = difference_pc.remove_radius_outlier(nb_points = 25, radius = 0.025, print_progress = True)
+    print("remove_outlier: DONE!")
 
-o3d.visualization.draw_geometries([difference_pc])
+    o3d.visualization.draw_geometries([dst, src, difference_pc])
+    o3d.visualization.draw_geometries([dst, difference_pc])
+    o3d.visualization.draw_geometries([src, difference_pc])
+
+    o3d.visualization.draw_geometries([difference_pc])
