@@ -44,10 +44,13 @@ if __name__ == "__main__":
     result = detect_change(after, before, 0.05)
     result.paint_uniform_color([1, 0, 0])
 
-    o3d.visualization.draw_geometries([before, result, change])
-
-    compare = detect_change(change, result, 0.0)
+    compare = detect_change(result, change, 0.01)
     compare.paint_uniform_color([0, 0, 1])
 
-    o3d.visualization.draw_geometries([ result, change, compare])
+    print(change)
+    print(result)
+    print(compare)
 
+#    o3d.visualization.draw_geometries([before, result, change])
+#    o3d.visualization.draw_geometries([ result, change, compare])
+    o3d.visualization.draw_geometries([compare, result, change])
