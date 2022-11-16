@@ -7,6 +7,17 @@ from dataclasses import dataclass
 import tools
 from change_detection import *
 
+def cluster(pcd, eps_in, min_points_in):
+    labeled = copy.deepcopy(pcd)
+    with o3d.utility.VerbosityContextManager(o3d.utility.VerbosityLevel.Debug) as cm:
+        labels = np.array(labeled.cluster_dbscan(eps = eps_in, min_points = min_points_in, print_progress=True))
+    max_label = labels.max()
+    print(f"point cloud has {max_label + 1} clusters")
+    colors = plt.get_cmap("jet")(labels / (max_label if max_label > 0 else 1))
+    colors[labels < 0] = 0
+    labeled.colors = o3d.utility.Vector3dVector(colors[:, :3])
+    return labeled
+
 hill = o3d.io.read_triangle_mesh("../meshes/simple-hill.ply")
 
 hill_erosion = o3d.io.read_triangle_mesh("../meshes/simple-hill-erosion3.ply")
@@ -74,18 +85,29 @@ after =  tools.concatenate_point_clouds([pc_0, pc_1,  pc_4, pc_5])
 before.paint_uniform_color([1, 0.706, 0])
 after.paint_uniform_color([0, 0.651, 0.929])
 
-mu, sigma = 0, 0.0  # mean and standard deviation
-after = tools.apply_noise(after, mu, sigma)
-
 print("Perform change detection")
-result = detect_change(after, before, 0.05)
+result = detect_change(after, before, 0.01)
 result.paint_uniform_color([1, 0, 0])
 
-result2 = detect_change(before, after, 0.05)
+result2 = detect_change(before, after, 0.01)
 result2.paint_uniform_color([0, 1, 0])
 
-print(change)
-print(result)
+
+print("Start outlier removal with nb_neighbors")
+cl, ind = result.remove_radius_outlier(nb_points = 10, radius = 0.05, print_progress = True)
+print("remove_outlier: DONE!")
+result_out = result.select_by_index(ind)
+
+print("Start outlier removal with nb_neighbors")
+cl, ind = result2.remove_radius_outlier(nb_points = 10, radius = 0.05, print_progress = True)
+print("remove_outlier: DONE!")
+result2_out = result2.select_by_index(ind)
+
+difference_pc_out_lab = cluster(difference_pc_out, 0.5, 2)
+difference_pc_out2_lab = cluster(difference_pc2_out, 0.5, 2)
+result_lab = cluster(result_out, 0.05, 5)
+result2_lab = cluster(result2_out, 0.05, 5)
+
 
 o3d.visualization.draw_geometries([hill_pc])
 o3d.visualization.draw_geometries([hill_erosion_pc])
@@ -93,10 +115,19 @@ o3d.visualization.draw_geometries([difference_pc])
 o3d.visualization.draw_geometries([difference_pc2])
 o3d.visualization.draw_geometries([difference_pc_out])
 o3d.visualization.draw_geometries([difference_pc2_out])
-o3d.visualization.draw_geometries([difference_pc, difference_pc2])
+o3d.visualization.draw_geometries([difference_pc_out, difference_pc2_out])
+o3d.visualization.draw_geometries([difference_pc_out_lab, difference_pc_out2_lab])
+o3d.visualization.draw_geometries([hill_pc, difference_pc_out_lab,difference_pc_out2_lab])
+o3d.visualization.draw_geometries([hill_erosion_pc, difference_pc_out_lab,difference_pc_out2_lab])
+
 
 o3d.visualization.draw_geometries([before])
 o3d.visualization.draw_geometries([after])
 o3d.visualization.draw_geometries([result])
 o3d.visualization.draw_geometries([result2])
-o3d.visualization.draw_geometries([result, result2])
+o3d.visualization.draw_geometries([result_out])
+o3d.visualization.draw_geometries([result2_out])
+o3d.visualization.draw_geometries([result_out, result2_out])
+o3d.visualization.draw_geometries([result_lab, result2_lab])
+o3d.visualization.draw_geometries([before, result_lab, result2_lab])
+o3d.visualization.draw_geometries([after, result_lab, result2_lab])
