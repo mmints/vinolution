@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def detect_change(src, dst, distance):
+    out = copy.deepcopy(src)
     dists = src.compute_point_cloud_distance(dst)
     difference_idx = np.argwhere(np.asarray(dists) > distance)
     out = src.select_by_index(difference_idx)
