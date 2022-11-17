@@ -17,3 +17,6 @@ def apply_noise(pcd, mu, sigma):
     points += np.random.normal(mu, sigma, size=points.shape)
     noisy_pcd.points = o3d.utility.Vector3dVector(points)
     return noisy_pcd
+
+def get_point_count(pcd):
+    return int(np.asarray(pcd.points).size/3) # Divide by 3 because it's always 3 coordinates
