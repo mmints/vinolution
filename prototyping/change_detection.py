@@ -1,14 +1,21 @@
 import copy
+import tools
 import open3d as o3d
 import numpy as np
 import matplotlib.pyplot as plt
 
-def detect_change(src, dst, distance):
-    out = copy.deepcopy(src)
+def detect_change(src, dst, threshold):
     dists = src.compute_point_cloud_distance(dst)
-    difference_idx = np.argwhere(np.asarray(dists) > distance)
+    difference_idx = np.argwhere(np.asarray(dists) > threshold)
     out = src.select_by_index(difference_idx)
     return out
+
+def full_change_detection(src, dst, threshold):
+    positive = detect_change(src, dst, threshold) # First checkout what positive and negative is
+    negative = detect_change(dst, src, threshold) # 
+    complete = tools.concatenate_point_clouds(positive, negative)
+    return positive, negative, complete
+
 
 def outlier_removal(pc, nb_points, radius):
     cl, ind = pc.remove_radius_outlier(nb_points, radius, print_progress = True)
