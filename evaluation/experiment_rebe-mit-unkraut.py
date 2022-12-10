@@ -72,6 +72,10 @@ if __name__ == "__main__":
 
         sigma += 0.0001
 
+
+    o3d.visualization.draw_geometries([result])
+    o3d.visualization.draw_plotly([before])
+
     plt.scatter(sigma_ar, completeness, cmap='viridis', label='recall')
     plt.scatter(sigma_ar, correctness, cmap='viridis', label='precision')
     # plt.scatter(sigma_ar, quality, cmap='viridis',label='quality')
@@ -88,4 +92,3 @@ if __name__ == "__main__":
     # To show the plot
     plt.show()
 
-    # o3d.visualization.draw_geometries([fp, result])
