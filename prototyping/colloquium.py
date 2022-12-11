@@ -162,4 +162,5 @@ o3d.visualization.draw_geometries([difference_pc2_out])
 # o3d.visualization.draw_geometries([before, result_lab, result2_lab])
 # o3d.visualization.draw_geometries([after, result_lab, result2_lab])
 
+
 # o3d.visualization.draw_geometries([res_row_lab,dst])
