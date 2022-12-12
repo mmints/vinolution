@@ -2,6 +2,7 @@ import copy
 import open3d as o3d
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 def detect_change(src, dst, distance):
     dists = src.compute_point_cloud_distance(dst)
@@ -10,7 +11,13 @@ def detect_change(src, dst, distance):
     return out
 
 def outlier_removal(pc, nb_points, radius):
+    if radius == 0.0: # Do nothing if radius is 0
+        return pc
+    time.sleep(0.5)
+    print("fuck")
     cl, ind = pc.remove_radius_outlier(nb_points, radius, print_progress = True)
+    time.sleep(0.5)
+    print("Up")
     out = pc.select_by_index(ind)
     return out
 
